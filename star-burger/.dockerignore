@@ -1,0 +1,9 @@
+.idea
+.parcel-cache
+venv
+node_modules
+.dockerignore
+.env
+db.sqlite3
+.git
+media
