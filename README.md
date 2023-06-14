@@ -37,7 +37,6 @@ docker context create starburger-prod --docker host=ssh://<user>@<remote_host_IP
 ```commandline
 docker context use <context-name>
 ```
- - _см. скрипты `dev/deploy-dev.cmd` и `prod/deploy-prod.cmd`_
 
 ### Подготовка
 Для обоих режимов запуска сайта требуется файл `.env` со следующим содержимым:
