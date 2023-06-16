@@ -10,7 +10,14 @@ services:
       POSTGRES_USER: ${POSTGRES_USER-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD-postgres}
 
-  web:
+  front:
+    restart: on-failure
+    build:
+      context: ../front/
+    volumes:
+      - front:/app/front
+
+  back:
     restart: always
     build:
       context: ../star-burger/
@@ -19,10 +26,11 @@ services:
     env_file:
       - .env
     volumes:
-      - media:/app/media
+      - front:/app/front
     depends_on:
       - db
+      - front
 
 volumes:
   db_data:
-  media:
+  front:

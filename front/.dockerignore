@@ -1,10 +1,7 @@
 .idea
 .parcel-cache
 .dockerignore
-.env
 .git
-venv
 node_modules
 media
-
 Dockerfile

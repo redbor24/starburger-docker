@@ -65,7 +65,8 @@ docker context use <context-name>
 
 Создайте `.env`-файлы с нужными значениями в папках `/dev` и `/prod`  
 
-### Development deploy
+### Deploymant
+#### Development deploy
 Для запуска сайта в локальном Docker-е выполните:
 ```commandline
 cd dev
@@ -75,12 +76,12 @@ docker compose up -d --build
 Он выполнит сборку фронтенда, соберёт статику, выполнит миграции и запустит сайт в Docker-е разработчика.
 Применение миграций и сборка статики прописана в скрипте `./prestart.sh`. 
 
-#### Создайте суперпользователя Django
+##### Создайте суперпользователя Django
 ```commandline
 docker exec -it dev-web-1 python manage.py createsuperuser
 ```
 
-### Production deploy
+#### Production deploy
 Для запуска сайта в удалённом Docker-е выполните
 ```commandline
 cd prod
@@ -90,7 +91,7 @@ docker compose up -d --build
 Он выполнит сборку фронтенда, соберёт статику, выполнит миграции и запустит сайт в Docker-е на удалённом сервере.
 Применение миграций и сборка статики прописана в скрипте `./prestart.sh`. 
 
-#### Создайте суперпользователя Django
+##### Создайте суперпользователя Django
 ```commandline
 docker exec -it prod-web-1 python manage.py createsuperuser
 ```

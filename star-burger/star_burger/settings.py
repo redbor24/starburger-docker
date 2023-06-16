@@ -9,7 +9,8 @@ env = Env()
 env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES = env('STATICFILES')
+STATIC_ROOT = os.path.join(BASE_DIR, STATICFILES)
 
 
 SECRET_KEY = env('SECRET_KEY')
@@ -81,7 +82,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'star_burger.wsgi.application'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA = env('MEDIA')
+MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA)
 MEDIA_URL = '/media/'
 
 DATABASES = {
@@ -89,8 +91,6 @@ DATABASES = {
         default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
     )
 }
-
-# print(f"DATABASE: {DATABASES['default']}")
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -123,8 +123,10 @@ INTERNAL_IPS = [
     '127.0.0.1'
 ]
 
+ASSETS = env('ASSETS')
+BUNDLES = env('BUNDLES')
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "assets"),
-    os.path.join(BASE_DIR, "bundles"),
+    os.path.join(BASE_DIR, ASSETS),
+    os.path.join(BASE_DIR, BUNDLES),
 ]
