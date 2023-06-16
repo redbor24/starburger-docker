@@ -72,16 +72,12 @@ cd dev
 docker context use default
 docker compose up -d --build
 ``` 
-Он выполнит сборку фронтенда, соберёт статику и запустит сайт в Docker-е разработчика.
+Он выполнит сборку фронтенда, соберёт статику, выполнит миграции и запустит сайт в Docker-е разработчика.
+Применение миграций и сборка статики прописана в скрипте `./prestart.sh`. 
 
 #### Создайте суперпользователя Django
-Подключитесь к контейнеру
 ```commandline
-docker exec -it dev-web-1 /bin/bash
-```
-Далее выполните
-```commandline
-python manage.py createsuperuser
+docker exec -it dev-web-1 python manage.py createsuperuser
 ```
 
 ### Production deploy
@@ -91,17 +87,12 @@ cd prod
 docker context use starburger-prod
 docker compose up -d --build
 ``` 
-
-Он выполнит сборку фронтенда, соберёт статику и запустит сайт в Docker-е на удалённом сервере.
+Он выполнит сборку фронтенда, соберёт статику, выполнит миграции и запустит сайт в Docker-е на удалённом сервере.
+Применение миграций и сборка статики прописана в скрипте `./prestart.sh`. 
 
 #### Создайте суперпользователя Django
-Подключитесь к контейнеру
 ```commandline
-docker exec -it prod-web-1 /bin/bash
-```
-Далее выполните
-```commandline
-python manage.py createsuperuser
+docker exec -it prod-web-1 python manage.py createsuperuser
 ```
 
 ### Локальный запуск проекта *без* использования `Docker`
@@ -120,7 +111,7 @@ venv\scripts\activate
 
 Проверьте, что `Node.js` и его пакетный менеджер корректно установлены. Если всё исправно, то терминал выведет их версии:
 
-```sh
+```commandline
 nodejs --version
 # v12.18.2
 # Если ошибка, попробуйте node:
@@ -136,7 +127,7 @@ npm --version
 
 Перейдите в каталог проекта и установите пакеты `Node.js`:
 
-```sh
+```commandline
 cd star-burger
 npm ci --dev
 ```
@@ -144,11 +135,11 @@ npm ci --dev
 Выполните сборку фронтенда:
 
 *nix:
-```sh
+```commandline
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 Windows:
-```sh
+```commandline
 .\node_modules\.bin\parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 
