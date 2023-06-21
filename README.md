@@ -10,41 +10,16 @@ Docker-а на удалённом сервере.
 ## Структура каталогов
  - `dev/` - скрипты, конфигурация и `docker-compose.yaml` для `development` деплоя.
  - `prod/` - скрипты, конфигурация и `docker-compose.yaml` для `production` деплоя.
- - `star-burger/` - исходный код проекта. Фронт и бэк в одном флаконе.
-
-## Варианты деплоя
-Проект может быть развёрнут в режиме разработчика и production-режиме. 
-Переключение между ними выполняется посредством использования 
-[Docker-context](https://docs.docker.com/engine/context/working-with-contexts/).
-
-После установки Docker на локальную машину в нём уже есть `default context`, который мы будем использовать в качестве
-контекста разработки:
-```commandline
-> docker context list
-NAME                TYPE                DESCRIPTION                               DOCKER ENDPOINT                             KUBERNETES ENDPOINT   ORCHESTRATOR
-default *           moby                Current DOCKER_HOST based configuration   npipe:////./pipe/docker_engine
-...
-```
-
-Для работы с удалённым сервером необходимо [создать](https://code.visualstudio.com/docs/containers/ssh) ещё один
-`Docker-context`.
-```commandline
-docker context create starburger-prod --docker host=ssh://<user>@<remote_host_IP>
-```
- - _Подставьте нужные вам значения пользователя на удалённом сервере и IP-адреса удалённого сервера_
-
-Переключение между контекстами:
-```commandline
-docker context use <context-name>
-```
+ - `star-burger/` - исходный код бэка проекта.
+ - `front/` - исходный код фронта проекта.
 
 ### Подготовка
-Для обоих режимов запуска сайта требуется файл `.env` со следующим содержимым:
+Для запуска сайта требуется файл `.env` со следующим содержимым:
  - **SECRET_KEY**=<[секретный ключ Django](https://www.educative.io/answers/how-to-generate-a-django-secretkey)>
  - **YANDEX_GEOCODER_API**=<[ключ Yandex GeoAPI](https://developer.tech.yandex.ru/services)>
 
-   _Если что-то осталось непонятным можно ещё [сюда](https://dvmn.org/encyclopedia/api-docs/yandex-geocoder-api/) 
-   посмотреть._
+   _Если остались вопросы можно посмотреть [сюда](https://dvmn.org/encyclopedia/api-docs/yandex-geocoder-api/)._
+
  - **DEBUG**=
 
    _Может иметь значения `True` или `False`_
@@ -63,56 +38,102 @@ docker context use <context-name>
  
    _Для `development`-варианта можно не заполнять._
 
-Создайте `.env`-файлы с нужными значениями в папках `/dev` и `/prod`  
+В папках `/dev` и `/prod` находятся файлы `.env-example`, предзаполненные значениями, которые не требуют изменения для
+простого запуска сайта.
+
+На основе файла `.env-example` в нужной вам папке создайте `.env`-файл, дописав в него вышеописанные параметры.
 
 ### Deploymant
+
+#### Варианты деплоя
+Проект может быть развёрнут в режиме `разработчика` и `production`-режиме. 
+Переключение между ними выполняется посредством использования 
+[Docker-context](https://docs.docker.com/engine/context/working-with-contexts/).
+
+Для работы с удалённым сервером необходимо [создать](https://code.visualstudio.com/docs/containers/ssh) `Docker-context`.
+```shell
+docker context create starburger-prod --docker host=ssh://<user>@<remote_host_IP>
+```
+ - _Подставьте нужные вам значения пользователя на удалённом сервере и IP-адреса удалённого сервера_
+
+Пример:
+```shell
+docker context create starburger-prod --docker host=ssh://root@12.23.34.45
+```
+Эта команда создаст `docker context` с подключением к серверу с IP-адресом `12.23.34.45` под пользователем `root`.
+
+Переключение между контекстами:
+```shell
+docker context use <context-name>
+```
+
+#### Порт сайта
+Сейчас сайт отзывается на порту `8080`, а не на `80`. Это сделано специально,
+во избежание конфликтов с уже имеющимися сервисами, которые уже сидят на 80-ом порту и помешают протестировать 
+сайт при первом запуске.
+
+Чтобы изменить порт сайта, скорректируйте строку в файле `./dev/docker-compose.yaml` или 
+`./prod/docker-compose.yaml`:
+```yaml
+services:
+  ...
+  back:
+    ...
+    ports:
+      - 8080:8080  << впишите перед двоеточием нужный вам порт
+```
+
+
 #### Development deploy
-Для запуска сайта в локальном Docker-е выполните:
-```commandline
-cd dev
+Разворачивание и запуск сайта в локальном Docker-е:
+```shell
 docker context use default
+cd ./dev
 docker compose up -d --build
 ``` 
 Он выполнит сборку фронтенда, соберёт статику, выполнит миграции и запустит сайт в Docker-е разработчика.
-Применение миграций и сборка статики прописана в скрипте `./prestart.sh`. 
+ - _Вызов применения миграций и сборки статики прописан в скрипте `./prestart.sh`._ 
 
-##### Создайте суперпользователя Django
-```commandline
-docker exec -it dev-web-1 python manage.py createsuperuser
+Создайте суперпользователя Django
+```shell
+docker exec -it dev-back-1 python manage.py createsuperuser
 ```
+Откройте сайт [http://localhost:8080](http://localhost:8080).
+
 
 #### Production deploy
-Для запуска сайта в удалённом Docker-е выполните
-```commandline
-cd prod
+Разворачивание и запуск сайта в удалённом Docker-е:
+```shell
 docker context use starburger-prod
+cd ./prod
 docker compose up -d --build
 ``` 
 Он выполнит сборку фронтенда, соберёт статику, выполнит миграции и запустит сайт в Docker-е на удалённом сервере.
-Применение миграций и сборка статики прописана в скрипте `./prestart.sh`. 
+ - _Вызов применения миграций и сборки статики прописан в скрипте `./prestart.sh`._ 
 
-##### Создайте суперпользователя Django
-```commandline
-docker exec -it prod-web-1 python manage.py createsuperuser
+Создайте суперпользователя Django
+```shell
+docker exec -it prod-back-1 python manage.py createsuperuser
 ```
+Откройте сайт [http://<IP-адрес вашего сервера>:8080](http://:8080).
+
 
 ### Локальный запуск проекта *без* использования `Docker`
 Перейдите в папку `star-burger` с исходным кодом проекта.
 
 Активируйте виртуальное окружение:
-```commandline
+```shell
 venv\scripts\activate
 ```
 
 Создайте `.env`-файл с нужными вам значениями параметров, согласно приведённому выше описанию. 
 
 #### Сборка фронтенда
-
 [Установите Node.js](https://nodejs.org/en/), если у вас его ещё нет.
 
 Проверьте, что `Node.js` и его пакетный менеджер корректно установлены. Если всё исправно, то терминал выведет их версии:
 
-```commandline
+```shell
 nodejs --version
 # v12.18.2
 # Если ошибка, попробуйте node:
@@ -128,7 +149,7 @@ npm --version
 
 Перейдите в каталог проекта и установите пакеты `Node.js`:
 
-```commandline
+```shell
 cd star-burger
 npm ci --dev
 ```
@@ -136,26 +157,26 @@ npm ci --dev
 Выполните сборку фронтенда:
 
 *nix:
-```commandline
+```shell
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 Windows:
-```commandline
+```shell
 .\node_modules\.bin\parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
 
 Выполните миграции:
-```commandline
+```shell
 python manage.py makemigrations
 ```
 
 Создайте суперпользователя Django:
-```commandline
+```shell
 python manage.py createsuperuser
 ```
 
 Запустите сайт:
-```commandline
+```shell
 python manage.py runserver
 ```
 Перейдите по указанной ссылке. 
